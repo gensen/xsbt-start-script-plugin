@@ -22,7 +22,7 @@ object StartScriptBuild extends Build {
             // Versions and git tags should follow: http://semver.org/
             // except using -SNAPSHOT instead of without hyphen.
 
-            version := "0.5.1-SNAPSHOT",
+            version := "0.5.2-gs",
             libraryDependencies <++= sbtVersion {
 		(version) =>
 		    Seq("org.scala-sbt" %% "io" % version % "provided",
@@ -31,10 +31,15 @@ object StartScriptBuild extends Build {
             },
 
             // publish stuff
-            publishTo <<= (version) { v =>
-                import Classpaths._
-                Option(if (v endsWith "SNAPSHOT") typesafeSnapshots else typesafeResolver)
-            },
-            publishMavenStyle := false,
-            credentials += Credentials(Path.userHome / ".ivy2" / ".typesafe-credentials"))
+    publishTo   <<= (version) { version: String =>
+      val nexus = "http://nexus.generalsensing.com/content/repositories/"
+      if (version.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "snapshots/")
+      else                                   Some("releases"  at nexus + "releases/")
+    },
+            // publishTo <<= (version) { v =>
+            //     import Classpaths._
+            //     Option(if (v endsWith "SNAPSHOT") typesafeSnapshots else typesafeResolver)
+            // },
+            publishMavenStyle := true,
+            credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"))
 }
